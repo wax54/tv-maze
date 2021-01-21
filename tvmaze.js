@@ -77,10 +77,11 @@ function populateShows(shows) {
 
 
 function populateEpisodes(episodes) {
-  console.log(episodes);
   const $episodeArea = $("#episodes-area");
-  for (episode of episodes) {
-    const content = $(`<li>${episode.name}</li>`);
+  $episodeArea.empty();
+
+  for ({ name, number, season } of episodes) {
+    const content = $(`<li>${name}(season${season}, episode${number})</li>`);
     $episodeArea.append(content);
   }
 
@@ -96,12 +97,12 @@ function populateEpisodes(episodes) {
 $("#search-form").on("submit", async function handleSearch (evt) {
   evt.preventDefault();
 
-  let query = $("#search-query").val();
+  const query = $("#search-query").val();
   if (!query) return;
 
   $("#episodes-area").hide();
 
-  let shows = await searchShows(query);
+  const shows = await searchShows(query);
 
   populateShows(shows);
 });
