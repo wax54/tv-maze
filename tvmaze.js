@@ -1,8 +1,9 @@
-const GENERIC_URL = 'generic_tv.png'
+const GENERIC_URL = 'generic-tv.png'
 
 /** Given a query string, return array of matching shows:
  *     { id, name, summary, episodesUrl }
  */
+
 
 
 /** Search Shows
@@ -19,9 +20,8 @@ const GENERIC_URL = 'generic_tv.png'
         image: <an image from the show data, or a default imege if no image exists, (image isn't needed until later)>
       }
  */
+
 async function searchShows(query) {
-  // TODO: Make an ajax request to the searchShows api.  Remove
-  // hard coded data.
   try {
     const res = await axios.get('http://api.tvmaze.com/search/shows',
       {
@@ -49,7 +49,6 @@ async function searchShows(query) {
 }
 
 
-
 /** Populate shows list:
  *     - given list of shows, add shows to DOM
  */
@@ -62,9 +61,11 @@ function populateShows(shows) {
     let $item = $(
       `<div class="col-md-6 col-lg-3 Show" data-show-id="${show.id}">
          <div class="card" data-show-id="${show.id}">
+         <img class="card-img-top" src="${show.image}">
            <div class="card-body">
              <h5 class="card-title">${show.name}</h5>
              <p class="card-text">${show.summary}</p>
+             <button class="btn btn-secondary epi-btn">Episodes</button>
            </div>
          </div>
        </div>
@@ -74,6 +75,18 @@ function populateShows(shows) {
   }
 }
 
+
+function populateEpisodes(episodes) {
+  console.log(episodes);
+  const $episodeArea = $("#episodes-area");
+  for (episode of episodes) {
+    const content = $(`<li>${episode.name}</li>`);
+    $episodeArea.append(content);
+  }
+
+  $episodeArea.show();
+
+}
 
 /** Handle search form submission:
  *    - hide episodes area
@@ -93,15 +106,27 @@ $("#search-form").on("submit", async function handleSearch (evt) {
   populateShows(shows);
 });
 
-
+$("#shows-list").on('click', '.epi-btn', async function showEpisodes(evt) {
+  const showId = $(this).parent().parent().data().showId;
+  const episodes = await getEpisodes(showId);
+  populateEpisodes(episodes);
+});
 /** Given a show ID, return list of episodes:
  *      { id, name, season, number }
  */
 
 async function getEpisodes(id) {
-  // TODO: get episodes from tvmaze
-  //       you can get this by making GET request to
-  //       http://api.tvmaze.com/shows/SHOW-ID-HERE/episodes
 
-  // TODO: return array-of-episode-info, as described in docstring above
+  try {
+    const res = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`);
+
+    const episodes = res.data;
+    const formatted = episodes.map(
+      ({ id, name, number, season }) => ({ id, name, number, season })
+    );
+    return formatted;
+  } catch (e) {
+    console.log('Error On Search', e);
+    return;
+  }
 }
